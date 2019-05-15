@@ -43,4 +43,14 @@ public class SearchQuery implements Serializable {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
+	public boolean isValidQuery() {
+		if (this.name == ""
+				&& this.description == ""
+				&& this.maxPrice == 0
+				&& this.minPrice == 0) {
+			return false;
+		}
+		return true;
+	}
 }

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>商品検索</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+</head>
+<body>
+<h1>商品検索</h1>
+<script type="text/javascript">
+	$(function(){
+		$("#response").html("Response Values");
+		$("#button").click( function(){
+            var url = $("#url_post").val();
+
+                var JSONdata = {
+                    name: $("#name").val(),
+                    description: $("#description").val(),
+                    maxPrice: $("#maxPrice").val(),
+                    minPrice: $("#minPrice").val()      
+                };
+
+            alert(JSON.stringify(JSONdata));
+
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : JSON.stringify(JSONdata),
+                contentType: 'application/JSON',
+                dataType : 'JSON',
+                scriptCharset: 'utf-8',
+                success : function(data) {
+
+                    // Success
+                    alert(JSON.stringify(data));
+                    $("#response").html(JSON.stringify(data));
+                },
+                error : function(data) {
+
+                    // Error
+                    alert("error");
+                    alert(JSON.stringify(data));
+                    $("#response").html(JSON.stringify(data));
+                }
+            });
+		})
+	})
+</script>
+	<p>URL: <input type="text" id="url_post" name="url" size="100" value="http://localhost:9084/search" /></p>
+	<p>name: <input type = "text" id = "name" name = "name" /></p>
+	<p>description: <input type = "text" id = "description" name = "description" /></p>
+	<p>maxPrice: <input type = "text" id = "maxPrice" name = "minPrice" /></p>
+	<p>minPrice: <input type = "text" id = "minPrice" name = "maxPrice" /></p>
+	<p><input type="submit" id = "button" value="click" /></p>
+</body>
+</html>

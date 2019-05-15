@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"></meta>
+<title>Your Twitter!!!!!!</title>
+</head>
+<body>
+	<h3>Hello, <span th:text="${twitterProfile.name}">Some User</span>!!!!</h3>
+	<h4 th:text="#{favorites.info}+':'">These are your favorites:</h4>
+	<table>
+		<tr th:each="favorite:${favorites}">
+			<td th:text="${favorite.fromUser}">User name</td>
+			<td th:text="${favorite.text}">Text</td>
+		</tr>
+	</table>
+	<form action="/connect/twitter"  method="post">
+		<input type="hidden" name="_method" value="DELETE"></input>
+		<button type="submit" th:text="#{logout}">Logout</button>
+	</form>
+</body>
+</html>

@@ -19,6 +19,7 @@ import com.example.demo.entity.GoodsEntity;
 import com.example.demo.entity.SearchQuery;
 import com.example.demo.exception.ExceptionCommon;
 import com.example.demo.repository.GoodsRepository;
+import com.example.demo.schedule.ScheduledService;
 
 @RestController
 @RequestMapping("/")
@@ -26,6 +27,9 @@ public class ApiController {
 	@Autowired
 	private GoodsRepository repository;
 	
+	@Autowired
+	private ScheduledService scheduledService;
+
 	//デバッグ用 全てのレコードを出力
     @RequestMapping(value = "/show", method = RequestMethod.GET)
     @ResponseBody
@@ -47,12 +51,12 @@ public class ApiController {
     @ResponseBody
     @Transactional
     public List<GoodsEntity> add(Model model, @RequestBody GoodsEntity good) {
-    	//追加する商品データが正しいか確認する
+    	//追加する商品データに漏れがないか確認する
     	if(good.getName() == null || good.getDescription() == null || good.getPrice() == 0){
     		throw new ExceptionCommon("Your request is not enouth.");
     	}
 
-    	//同じ商品がすでにDB内に存在しているかを確認する
+    	//同じ商品（同一名の物）がすでにDB内に存在しているかを確認する
     	List<GoodsEntity> record = repository.findByName(good.getName());
     	if(record.size() != 0) {
     		throw new ExceptionCommon(good.getName() + " is already added");

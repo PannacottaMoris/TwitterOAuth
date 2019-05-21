@@ -43,7 +43,8 @@ public class SearchQuery implements Serializable {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
+
+	//クエリパラメータが全て存在しない場合は不適切とする
 	public boolean isValidQuery() {
 		if (this.name == ""
 				&& this.description == ""

@@ -9,15 +9,20 @@
 <h1>商品検索</h1>
 <script type="text/javascript">
 	$(function(){
+//		var target = "http://ec2-3-112-189-8.ap-northeast-1.compute.amazonaws.com:9085/";
+		var target = "http://localhost:9085/";
+		
 		$("#response").html("Response Values");
-		$("#button").click( function(){
-            var url = $("#url_post").val();
+		
+		//検索
+		$("#button_search").click( function(){
+            var url = target + "search";
 
                 var JSONdata = {
-                    name: $("#name").val(),
-                    description: $("#description").val(),
-                    maxPrice: $("#maxPrice").val(),
-                    minPrice: $("#minPrice").val()      
+                    name: $("#name_s").val(),
+                    description: $("#description_s").val(),
+                    maxPrice: $("#maxPrice_s").val(),
+                    minPrice: $("#minPrice_s").val()      
                 };
 
             alert(JSON.stringify(JSONdata));
@@ -44,15 +49,63 @@
                 }
             });
 		})
+		
+		//追加・削除・更新
+		$("#button_other").click( function(){
+            var url = target + $('input[name="other"]:checked').val();
+
+                var JSONdata = {
+                    name: $("#name").val(),
+                    description: $("#description").val(),
+                    price: $("#price").val()     
+                };
+
+            alert("Send to: " + url + "    Body: " + JSON.stringify(JSONdata));
+
+            $.ajax({
+                type : 'post',
+                url : url,
+                data : JSON.stringify(JSONdata),
+                contentType: 'application/JSON',
+                dataType : 'JSON',
+                scriptCharset: 'utf-8',
+                success : function(data) {
+
+                    // Success
+                    alert(JSON.stringify(data));
+                    $("#response").html(JSON.stringify(data));
+                },
+                error : function(data) {
+
+                    // Error
+                    alert("error");
+                    alert(JSON.stringify(data));
+                    $("#response").html(JSON.stringify(data));
+                }
+            });
+		})
 	})
 </script>
-	<p>URL: <input type="text" id="url_post" name="url" size="100" value="http://localhost:9085/search" /></p>
+<!--  <p>URL: <input type="text" id="url_post" name="url" size="100" value="http://localhost:9085/search" /></p>  -->
+<!--  <p>URL: <input type="text" id="url_post" name="url" size="100" value="http://ec2-3-112-189-8.ap-northeast-1.compute.amazonaws.com:9085/search" /></p> -->
+	<p>name: <input type = "text" id = "name_s" name = "name_s" /></p>
+	<p>description: <input type = "text" id = "description_s" name = "description_s" /></p>
+	<p>maxPrice: <input type = "text" id = "maxPrice_s" name = "minPrice_s" /></p>
+	<p>minPrice: <input type = "text" id = "minPrice_s" name = "maxPrice_s" /></p>
+	<p><input type="submit" id = "button_search" value="click" /></p>
+<br />
+<br />
+<br />
+【商品 追加/削除/更新】
+	<p>種別: 
+	<input type="radio" name = "other" id="url_post" value="add" />add
+	<input type="radio" name = "other" id="url_post" value="update" />update
+	<input type="radio" name = "other" id="url_post" value="delete" />delete
+	</p>
 	<p>name: <input type = "text" id = "name" name = "name" /></p>
 	<p>description: <input type = "text" id = "description" name = "description" /></p>
-	<p>maxPrice: <input type = "text" id = "maxPrice" name = "minPrice" /></p>
-	<p>minPrice: <input type = "text" id = "minPrice" name = "maxPrice" /></p>
-	<p><input type="submit" id = "button" value="click" /></p>
-
+	<p>maxPrice: <input type = "text" id = "price" name = "price" /></p>
+	<p><input type="submit" id = "button_other" value="click" /></p>
 【新商品】
 <table border="1">
 	<tr><th>商品名</th><th>価格</th><th>説明</th></tr>

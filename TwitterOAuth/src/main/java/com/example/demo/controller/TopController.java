@@ -1,3 +1,8 @@
+/*
+ * TopController.java
+ * Topページにアクセスした際のアクセスコントロールやページ遷移を管理する。
+ */
+
 package com.example.demo.controller;
 
 import java.util.List;

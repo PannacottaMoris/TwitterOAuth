@@ -1,3 +1,8 @@
+/*
+ * TwitterConnectController.java
+ * Twitterへのアクセス、認証を管理する。
+ */
+
 package com.example.demo.controller;
 
 import javax.inject.Inject;

@@ -1,3 +1,8 @@
+/*
+ * ApiController.java
+ * RESTfullAPIをコントロールする。
+ */
+
 package com.example.demo.controller;
 
 import java.util.List;
@@ -19,16 +24,12 @@ import com.example.demo.entity.GoodsEntity;
 import com.example.demo.entity.SearchQuery;
 import com.example.demo.exception.ExceptionCommon;
 import com.example.demo.repository.GoodsRepository;
-import com.example.demo.schedule.ScheduledService;
 
 @RestController
 @RequestMapping("/")
 public class ApiController {
 	@Autowired
 	private GoodsRepository repository;
-	
-	@Autowired
-	private ScheduledService scheduledService;
 
 	//デバッグ用 全てのレコードを出力
     @RequestMapping(value = "/show", method = RequestMethod.GET)
@@ -52,6 +53,7 @@ public class ApiController {
     @Transactional
     public List<GoodsEntity> add(Model model, @RequestBody GoodsEntity good) {
     	//追加する商品データに漏れがないか確認する
+    	//名前、説明、価格の全てが入力されていない場合はエラーとなる。
     	if(good.getName() == null || good.getDescription() == null || good.getPrice() == 0){
     		throw new ExceptionCommon("Your request is not enouth.");
     	}
@@ -77,6 +79,8 @@ public class ApiController {
     	if(!query.isValidQuery()) {
     		throw new ExceptionCommon("Nothing in the store");
     	}
+    	//動的クエリを作成する。
+    	//名前、説明、最低価格、最高価格のうち入力されているものをAND検索する。
     	List<GoodsEntity> result = repository.findAll(Specifications
     			.where(QuerySpeficiations.nameContains(query.getName()))
     			.and(QuerySpeficiations.descriptionContains(query.getDescription()))
@@ -95,6 +99,7 @@ public class ApiController {
     @Transactional
     public List<GoodsEntity> update(Model model, @RequestBody GoodsEntity good) {
 		//入力された商品データを確認する
+		//名前、説明、価格の全てが入力されていない場合はエラーとなる。
 		if(good.getName() == null || good.getDescription() == null || good.getPrice() == 0){
     		throw new ExceptionCommon("Your request is not enouth.");
     	}
@@ -114,6 +119,7 @@ public class ApiController {
     }
 
 	//商品データ削除
+	//名前が一致するものを削除する
     @RequestMapping(value="/delete", method = RequestMethod.POST,
     		consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

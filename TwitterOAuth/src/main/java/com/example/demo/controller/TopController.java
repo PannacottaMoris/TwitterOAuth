@@ -39,15 +39,15 @@ public class TopController {
 		this.twitter = twitter;
 		this.connectionRepository = connectionRepository;
 	}
-	
+
 	//Twitterへのログイン状況を確認する。
-	public boolean isNeedLogin() {
+	private boolean isNeedLogin() {
 		if (connectionRepository.findPrimaryConnection(Twitter.class) == null) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	//Twitter認証状況を確認し、見認証ならば接続ページへ遷移する。
 	//認証済みであればTOPページへ遷移する。
 	@RequestMapping(method=RequestMethod.GET)

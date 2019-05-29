@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.example.demo.entity.GoodsEntity;
-import com.example.demo.entity.SearchQuery;
+import com.example.demo.model.SearchQueryModel;
 import com.example.demo.schedule.ScheduledService;
 
 @Controller
@@ -72,7 +72,7 @@ public class TopController {
 
 	//TOPページへ遷移
 	@RequestMapping(value = "top", method = RequestMethod.GET)
-	public ModelAndView index(@ModelAttribute SearchQuery query) {
+	public ModelAndView index(@ModelAttribute SearchQueryModel query) {
 		List<GoodsEntity> arrives = scheduleService.getArrivals();
 		List<GoodsEntity> discontinued = scheduleService.getDiscontinued();
 		ModelAndView mav = new ModelAndView();

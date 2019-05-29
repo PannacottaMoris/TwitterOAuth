@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.QuerySpeficiations;
 import com.example.demo.entity.GoodsEntity;
-import com.example.demo.entity.SearchQuery;
 import com.example.demo.exception.ExceptionCommon;
+import com.example.demo.model.SearchQueryModel;
 import com.example.demo.repository.GoodsRepository;
 
 @RestController
@@ -44,7 +44,7 @@ public class ApiController {
     @RequestMapping(value = "/query", method = RequestMethod.POST,
     		consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public SearchQuery sq(Model model, @RequestBody SearchQuery query) throws Exception {
+    public SearchQueryModel sq(Model model, @RequestBody SearchQueryModel query) throws Exception {
     	return query;
     }
 
@@ -58,6 +58,9 @@ public class ApiController {
     	//名前、説明、価格の全てが入力されていない場合はエラーとなる。
     	if(good.getName() == null || good.getDescription() == null || good.getPrice() == 0){
     		throw new ExceptionCommon("Your request is not enouth.");
+    	}
+    	if (!(good.isValidNameRequest() && good.isValidDescRequest())) {
+    		throw new ExceptionCommon("Your request is included forbidden word.");
     	}
 
     	//同じ商品（同一名の物）がすでにDB内に存在しているかを確認する
@@ -77,13 +80,14 @@ public class ApiController {
     @RequestMapping(path="/search", method = RequestMethod.POST,
     		consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<GoodsEntity> search(Model model, @RequestBody SearchQuery query) {
+    public List<GoodsEntity> search(Model model, @RequestBody SearchQueryModel query) {
     	if(!query.isValidQuery()) {
     		throw new ExceptionCommon("Nothing in the store");
     	}
     	//動的クエリを作成する。
     	//名前、説明、最低価格、最高価格のうち入力されているものをAND検索する。
-    	List<GoodsEntity> result = repository.findAll(Specifications
+    	@SuppressWarnings("unchecked")
+		List<GoodsEntity> result = repository.findAll(Specifications
     			.where(QuerySpeficiations.nameContains(query.getName()))
     			.and(QuerySpeficiations.descriptionContains(query.getDescription()))
     			.and(QuerySpeficiations.priceGreaterThanEqual(query.getMinPrice()))
@@ -105,6 +109,9 @@ public class ApiController {
 		if(good.getName() == null || good.getDescription() == null || good.getPrice() == 0){
     		throw new ExceptionCommon("Your request is not enouth.");
     	}
+		if(!(good.isValidNameRequest() && good.isValidDescRequest())) {
+			throw new ExceptionCommon("Your request is included forbidden word.");
+		}
     	List<GoodsEntity> target = repository.findByName(good.getName());
     	//更新対象データがDBに存在するかを確認する
     	if (target.size() == 0) {

@@ -3,32 +3,30 @@ $(function(){
 	var target = "http://localhost:9085/";
 	$('#errText').css({ color:"red" });
 	$('#addErrText').css({ color:"red" });
-	var errorSearch = {
-		'maxPriceError':false,
-		'minPriceError':false,
-		'searchNameError':false,
-		'searchDescriptionError':false,
+	var errorCode = {
+		'noError'					:0x00000000,
+		'maxPriceError'				:0x00000001,
+		'minPriceError'				:0x00000010,
+		'searchNameError'			:0x00000100,
+		'searchDescriptionError'	:0x00001000,
+		'nameError'					:0x00010000,
+		'descriptionError'			:0x00100000,
+		'priceError'				:0x01000000,
 	};
-	var errorAdd = {
-		'nameError':false,
-		'descriptionError':false,
-		'priceError':false,
+	var mask = {
+		'search':0x00001111,
+		'add'	:0x01110000,
 	};
-
-	var error = {
-		'search':errorSearch,
-		'add':errorAdd
-	};
+	var errorBit = errorCode['noError'];
 
 	$("#response").html("Response Values");
 
 	//フォーム入力値をチェックする
-	function checkPattern (target, errField, pattern, mode) {
-		var field = error[mode];
+	function checkPattern (target, errField, pattern) {
 		if (target.match(pattern) || target == ""){
-			field[errField] = false;
+			errorBit &= ~(errorCode[errField]);
 		} else {
-			field[errField] = true;
+			errorBit |= errorCode[errField];
 		}
 	}
 
@@ -37,60 +35,50 @@ $(function(){
 	//addであれば空白項目が1つでもあればtrue
 	//ただし、deleteの場合は名前フィールドのみ空白確認を行う
 	function isAllBlank (mode) {
-		var allBlank = true;
 		var deleteFlg = false;
-		var allSet = false;
 		if ($('input[name="other"]:checked').val() == "delete"){
 			deleteFlg = true;
 		}
 
 		if(mode == "search"){
-			if ($("#name_s").val() != ""){
-				allBlank = false;
-			}else if ($("#description_s").val() != ""){
-				allBlank = false;
-			}else if ($("#maxPrice_s").val() != ""){
-				allBlank = false;
-			}else if ($("#minPrice_s").val() != ""){
-				allBlank = false;
+			if ($("#name_s").val() != ""
+				|| $("#description_s").val() != ""
+				|| $("#maxPrice_s").val() != ""
+				|| $("#minPrice_s").val() != ""){
+				return false;
+			} else {
+				return true;
 			}
-			return allBlank;
-		} else if (mode == "add"){
-			if (deleteFlg){
-				if ($("#name").val() != ""){
-					return false;
-				}
+		} else if (mode == "add" && deleteFlg){
+			if ($("#name").val() != "") {
+				return false;
+			} else {
+				return true;
 			}
-			if ($("#name").val() == ""){
-				allSet = true;
-			}else if ($("#description").val() == ""){
-				allSet = true;
-			}else if ($("#price").val() == ""){
-				allSet = true;
+		} else if (mode = "add") {
+			if ($("#name").val() != ""
+				&& $("#description").val() != ""
+				&& $("#price").val() != "") {
+				return false
+			} else {
+				return true;
 			}
-			return allSet;
 		}
 		return true;
 	}
 
 	//エラーの発生を確認する
 	function isInvalid (mode) {
-		var field = error[mode];
-		var err = false;
-
-		$.each(field, function(index, value){
-			if (value == true){
-				err = true;
-				return false;
-			}
-		})
-		return err;
+		if (errorBit & mask[mode]) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	//エラー発生しているフォームの背景色を変更する
-	function formColor(id, errField, mode){
-		var field = error[mode];
-		if (field[errField] == true){
+	function formColor(id, errField){
+		if (errorBit & errorCode[errField]){
 			$(id).css({ background:"#F7D8D9" });
 		}else{
 			$(id).css({ background:"transparent" });
@@ -99,7 +87,6 @@ $(function(){
 
 	//エラーメッセージを表示する
 	function errText (msg, errField, mode){
-		var field = error[mode];
 		var id;
 		if (mode == "search"){
 			id = "#errText";
@@ -107,7 +94,7 @@ $(function(){
 			id = "#addErrText";
 		}
 
-		if (field[errField]){
+		if (errorBit & errorCode[errField]){
 			$(id).text("  " + msg);
 		}else{
 			$(id).text("");
@@ -117,29 +104,29 @@ $(function(){
 	//検索商品名検証
 	$('#name_s').keyup(function() {
 		var pattern = new RegExp("^[a-zA-Z]*$");
-		checkPattern($("#name_s").val(), "searchNameError", pattern, "search");
-		formColor('#name_s', "searchNameError", "search");
+		checkPattern($("#name_s").val(), "searchNameError", pattern);
+		formColor('#name_s', "searchNameError");
 		errText ("半角英数のみ入力できます", "searchNameError", "search");
 	});
 	//検索説明検証
 	$('#description_s').keyup(function() {
 		var pattern = new RegExp("^[a-zA-Z0-9][a-zA-Z ,\.]*$");
-		checkPattern($("#description_s").val(), "searchDescriptionError", pattern, "search");
-		formColor('#description_s', "searchDescriptionError", "search");
+		checkPattern($("#description_s").val(), "searchDescriptionError", pattern);
+		formColor('#description_s', "searchDescriptionError");
 		errText ("半角英数と一部記号のみ入力できます", "searchDescriptionError", "search");
 	});
 	//検索最高値検証
 	$('#maxPrice_s').keyup(function() {
 		var pattern = new RegExp("^[1-9][0-9]*$");
-		checkPattern($("#maxPrice_s").val(), "maxPriceError", pattern, "search");
-		formColor('#maxPrice_s', "maxPriceError", "search");
+		checkPattern($("#maxPrice_s").val(), "maxPriceError", pattern);
+		formColor('#maxPrice_s', "maxPriceError");
 		errText ("不適切な入力値があります", "maxPriceError", "search");
 	});
 	//検索最安値検証
 	$('#minPrice_s').keyup(function() {
 		var pattern = new RegExp("^[1-9][0-9]*$");
-		checkPattern($("#minPrice_s").val(), "minPriceError", pattern, "search");
-		formColor('#minPrice_s', "minPriceError", "search");
+		checkPattern($("#minPrice_s").val(), "minPriceError", pattern);
+		formColor('#minPrice_s', "minPriceError");
 		errText ("不適切な入力値があります", "minPriceError", "search");
 	});
 
@@ -182,22 +169,22 @@ $(function(){
 	//追加等商品名検証
 	$('#name').keyup(function() {
 		var pattern = new RegExp("^[a-zA-Z]*$");
-		checkPattern($("#name").val(), "nameError", pattern, "add");
-		formColor('#name', "nameError", "add");
+		checkPattern($("#name").val(), "nameError", pattern);
+		formColor('#name', "nameError");
 		errText ("半角英数のみ入力できます", "nameError", "add");
 	});
 	//追加等説明検証
 	$('#description').keyup(function() {
 		var pattern = new RegExp("^[a-zA-Z \.,]*$");
-		checkPattern($("#description").val(), "descriptionError", pattern, "add");
-		formColor('#description', "descriptionError", "add");
+		checkPattern($("#description").val(), "descriptionError", pattern);
+		formColor('#description', "descriptionError");
 		errText ("半角英数のみ入力できます", "descriptionError", "add");
 	});
 	//追加等値段検証
 	$('#price').keyup(function() {
 		var pattern = new RegExp("^[1-9][0-9]*$");
-		checkPattern($("#price").val(), "priceError", pattern, "add");
-		formColor('#price', "priceError", "add");
+		checkPattern($("#price").val(), "priceError", pattern);
+		formColor('#price', "priceError");
 		errText ("半角英数のみ入力できます", "priceError", "add");
 	});
 
@@ -208,7 +195,7 @@ $(function(){
 			$('#addErrText').text("   入力欄に誤りがあります");
 			return false;
 		}
-		if (isInvalid("add") == true || isAllBlank("add") == true){
+		else if (isInvalid("add") == true || isAllBlank("add") == true){
 			$('#addErrText').text("   入力欄に誤りがあります");
 			return false;
 		}
